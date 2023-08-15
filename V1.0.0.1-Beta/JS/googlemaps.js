@@ -59,7 +59,7 @@ Google.MapObject = (function () {
             /**
  * Creates a new Map Label
  * @constructor
- * @extends google.maps.OverlayView
+ * @extends google.maps.OverlayViewk
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
             function MapLabel(opt_options) {
