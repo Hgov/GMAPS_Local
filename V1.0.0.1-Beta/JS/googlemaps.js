@@ -6,7 +6,7 @@ const appointmentStatus = {
     unvisited: 1,
     allvisit: 2
 };
-let filterDivShowHide = true;
+let filterDivShowHide = false;
 
 
 Google.MapObject = (function () {
