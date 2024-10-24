@@ -143,7 +143,8 @@
                 <div class="form-row">
                   <div class="form-group col-md-12">
                     <label for="js-filter-multiple-branch" class="control-label mb-1">Branch:</label>
-                    <select class="form-control" id="js-filter-multiple-branch" name="branches[]" style="width: 100%;" multiple="multiple">
+                    <select class="form-control" id="js-filter-multiple-branch" name="branches[]" style="width: 100%;"
+                      multiple="multiple">
                     </select>
                   </div>
                 </div>
@@ -158,7 +159,7 @@
       <div class="col-lg-12">
         <div id="map"></div>
         <div id="version-info" class="versioninfo">
-          V 1.0.0.0
+          V 5.1.1
         </div>
       </div>
     </div>
@@ -199,6 +200,18 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <!-- City radius size -->
+          <div class="form-group mb-3">
+            <label for="cityRadiusSizeNumber">City Radius Size:</label>
+            <input type="number" id="cityRadiusSizeNumber" value="20000" class="form-control">
+          </div>
+
+           <!-- County radius size -->
+           <div class="form-group mb-3">
+            <label for="countyRadiusSizeNumber">City Radius Size:</label>
+            <input type="number" id="countyRadiusSizeNumber"  value="5000" class="form-control">
+          </div>
+
           <!-- Default Circle Color -->
           <div class="form-group mb-3">
             <label for="defaultcirclecolorcode">Default Circle Color Code:</label>

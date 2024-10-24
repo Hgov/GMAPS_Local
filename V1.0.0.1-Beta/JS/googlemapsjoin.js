@@ -3488,6 +3488,8 @@ var settingsGoogle = [
     {
         "id": "d86ebb04-28ef-ed11-8849-000d3abd8dc2",
         "defaultcirclecolorcode": "#f409c5",
+        "cityradiussize":"20000",
+        "countyradiussize":"5000",
         "markericoncode": 1,
         "text": "settings",
         "colorsettings": [

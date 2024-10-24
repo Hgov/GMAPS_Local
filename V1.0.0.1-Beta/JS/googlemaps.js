@@ -32,6 +32,8 @@ Google.MapObject = (function () {
 
     let latLng = { lat: 39.9334, lng: 32.8597 };
     let map = null;
+    let mapLabelCities = [];
+    let mapLabelCounties = [];
     var GMaps = {
         initMap: function (_users = [], _cities = [], _counties = [], _branches = [], _appointments = [], _settingsGoogle = [], _systemuserSettings = [], _markerIcon = {}) {
             /**Global Variables */
@@ -264,7 +266,7 @@ Google.MapObject = (function () {
                     }
                 }, 1000);
             }).finally(() => {
-                openCityInfoWindows(); // Şehir bilgi pencerelerini açar
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini açar
             });
 
             /* installation End*/
@@ -277,6 +279,14 @@ Google.MapObject = (function () {
 
             map.addListener('zoom_changed', function () {
                 let zoom = parseInt(map.getZoom());
+
+                mapLabelCities.forEach(mapLabelCity => {
+                    mapLabelCity.set('fontSize',zoom * 3);
+                });
+
+                mapLabelCounties.forEach(mapLabelCounty => {
+                    mapLabelCounty.set('fontSize',zoom * 3);
+                });
 
                 // Eğer filtrelenmiş şubeler varsa, onların marker'larını harita üzerinde tut.
                 if (IsSelectedItemsBranches.length > 0) {
@@ -385,26 +395,22 @@ Google.MapObject = (function () {
              * @param {boolean} radiusEditable - Çemberin yarıçapının düzenlenebilir olup olmadığı.
              * @return {object} - Çember ayarlarını içeren bir nesne.
              */
-            function getCircleSettings(filteredCount, position, radiusEditable) {
-                var radius = 20000;
+            function getCircleSettings(branchesCountSingle, position, radiusEditable, radiusSize) {
                 if (radiusEditable) {
-                    radius = parseInt(filteredCount).toString().length;
-                    if (radius == 1) {
-                        radius = radius * 3000;
+                    let branchesCountCharacter = parseInt(branchesCountSingle).toString().length;
+                    if (branchesCountCharacter == 2) {
+                        radiusSize += 20000
                     }
-                    if (radius == 2) {
-                        radius = radius * 1250;
+                    if (branchesCountCharacter == 3) {
+                        radiusSize += 30000
                     }
-                    if (radius == 3) {
-                        radius = radius * 1000;
-                    }
-                    if (radius == 4) {
-                        radius = radius * 900;
+                    if (branchesCountCharacter == 4) {
+                        radiusSize += 40000
                     }
                 }
                 let fillColor = googleSettings[0].defaultcirclecolorcode;
                 googleSettings[0].colorsettings.forEach(element => {
-                    if (filteredCount >= element.min && filteredCount <= element.maks) {
+                    if (branchesCountSingle >= element.min && branchesCountSingle <= element.maks) {
                         fillColor = element.colorcode;
                     }
                 });
@@ -412,12 +418,12 @@ Google.MapObject = (function () {
                 let circlesettings = {};
                 circlesettings.strokeColor = '#000';
                 circlesettings.strokeOpacity = .2;
-                circlesettings.strokeWeight = 3;
+                circlesettings.strokeWeight = 0;
                 circlesettings.fillColor = fillColor;
                 circlesettings.fillOpacity = 0.7;
                 circlesettings.map = map;
                 circlesettings.center = position;
-                circlesettings.radius = radius;
+                circlesettings.radius = radiusSize;
                 circlesettings.draggable = false;
                 circlesettings.editable = false;
                 circlesettings.clickable = true;
@@ -432,39 +438,41 @@ Google.MapObject = (function () {
              * @return {Promise} - Şehir çemberlerinin oluşturulma işlemi tamamlandığında çözülen bir promise döner.
              */
             function createCityCircles(cityList) {
-                var citiesLoading = () => {
+                const citiesLoading = () => {
                     removeCityCircles(cityCircles);
                     cityList = getFilteredCities();
-                    var counter = 0;
-                    var mapLabel;
+                    let counter = 0;
+                    let mapLabelCity = null;
                     cityList.forEach(function (value, i) {
-                        var branchesCountSingle = countBranchesByCity(value.id);
+                        let branchesCountSingle = countBranchesByCity(value.id);
                         if (branchesCountSingle == 0)
                             return;
-                        cityCircles.push(new google.maps.Circle(getCircleSettings(branchesCountSingle, value.center, false)));
+                        let cityRadiusSize = parseInt(googleSettings[0].cityradiussize);
+                        cityCircles.push(new google.maps.Circle(getCircleSettings(branchesCountSingle, value.center, true, cityRadiusSize)));
 
-                        mapLabel = new MapLabel({
+                        mapLabelCity = new MapLabel({
                             text: branchesCountSingle,
                             position: new google.maps.LatLng(value.center),
                             map: map,
-                            fontSize: 20,
+                            fontSize: 25,
                             align: 'center',
                             zIndex: 0
                         });
-                        mapLabel.set('position', new google.maps.LatLng(value.center));
-                        cityCircles[counter].bindTo('map', mapLabel);
-                        cityCircles[counter].bindTo('position', mapLabel);
+                        mapLabelCity.set('position', new google.maps.LatLng(value.center));
+                        cityCircles[counter].bindTo('map', mapLabelCity);
+                        cityCircles[counter].bindTo('position', mapLabelCity);
                         cityCircles[counter].setDraggable(false);
                         cityCircles[counter].addListener('click', function (mapsMouseEvent) {
                             var position = new google.maps.LatLng(mapsMouseEvent.latLng);
                             map.setCenter(position);
                             map.setZoom(10);
                         });
+                        mapLabelCities.push(mapLabelCity);
                         counter++;
                     });
                 }
                 return Promise.resolve(citiesLoading()).finally(() => {
-                    openCityInfoWindows();
+                    //openCityInfoWindows();
                 });
             }
 
@@ -475,22 +483,23 @@ Google.MapObject = (function () {
              * @return {Promise} - İlçe çemberlerinin oluşturulma işlemi tamamlandığında çözülen bir promise döner.
              */
             function createCountyCircles(countyList) {
-                var countiesLoading = () => {
+                const countiesLoading = () => {
                     removeCountyCircles(countyCircles);
                     countyList = getFilteredCounties();
                     let counter = 0;
-                    var mapLabelC;
+                    let mapLabelCounty = null;
                     countyList.forEach(function (value, i) {
-                        var branchesCountSingle = countBranchesByCounty(value.id);
+                        let branchesCountSingle = countBranchesByCounty(value.id);
                         if (branchesCountSingle == 0)
                             return;
-                        countyCircles.push(new google.maps.Circle(getCircleSettings(branchesCountSingle, value.center, true)));
+                        let countyRadiusSize = parseInt(googleSettings[0].countyradiussize);
+                        countyCircles.push(new google.maps.Circle(getCircleSettings(branchesCountSingle, value.center, true, countyRadiusSize)));
                         countyCircles[counter].addListener('click', function (mapsMouseEvent) {
                             var position = new google.maps.LatLng(mapsMouseEvent.latLng);
                             map.setCenter(position);
                             map.setZoom(13);
                         });
-                        mapLabelC = new MapLabel({
+                        mapLabelCounty = new MapLabel({
                             text: branchesCountSingle,
                             position: new google.maps.LatLng(value.center),
                             map: map,
@@ -498,15 +507,16 @@ Google.MapObject = (function () {
                             align: 'center',
                             zIndex: 0
                         });
-                        mapLabelC.set('position', new google.maps.LatLng(value.center));
-                        countyCircles[counter].bindTo('map', mapLabelC);
-                        countyCircles[counter].bindTo('position', mapLabelC);
+                        mapLabelCounty.set('position', new google.maps.LatLng(value.center));
+                        countyCircles[counter].bindTo('map', mapLabelCounty);
+                        countyCircles[counter].bindTo('position', mapLabelCounty);
                         countyCircles[counter].setDraggable(false);
+                        mapLabelCounties.push(mapLabelCounty);
                         counter++;
                     });
                 }
                 return Promise.resolve(countiesLoading()).finally(() => {
-                    openCountyInfoWindows();
+                    //openCountyInfoWindows();
                 });
             }
 
@@ -1157,8 +1167,8 @@ Google.MapObject = (function () {
                     // Eğer şube seçimi yoksa, haritayı başlangıç duruma döndür
                     createCityCircles(cityList); // Tüm şehir dairelerini oluştur
                     createCountyCircles(countyList); // Tüm ilçe dairelerini oluştur
-                    openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                    openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
+                    //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                    //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 }
 
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
@@ -1175,8 +1185,8 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1189,8 +1199,8 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1203,8 +1213,8 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1228,7 +1238,7 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1259,7 +1269,7 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1273,7 +1283,7 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                openCityInfoWindows(); // Şehir bilgi pencerelerini aç
+                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1291,6 +1301,10 @@ Google.MapObject = (function () {
 
             // Ayarları kaydetme işlemi için event handler
             $(document).on('click', '#saveSettings', function () {
+                //şehir ve ilçe radius boyutunu ayarla
+                googleSettings[0].cityradiussize = $('#cityRadiusSizeNumber').val();
+                googleSettings[0].countyradiussize = $('#countyRadiusSizeNumber').val();
+
                 // Default Circle Color Code'u güncelle
                 googleSettings[0].defaultcirclecolorcode = $('#defaultcirclecolorcode').val();
 
