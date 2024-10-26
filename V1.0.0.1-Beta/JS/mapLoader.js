@@ -10,7 +10,7 @@ Google.MapLoader = (function () {
         latLng = { lat: lat, lng: lng };
         map = new google.maps.Map(document.getElementById('map'), {
             center: latLng,
-            zoom: 6.5,
+            zoom: 6,
             panControl: false,
             mapTypeControl: true,
             scaleControl: false,
@@ -21,8 +21,12 @@ Google.MapLoader = (function () {
             zoomControl: true,
         });
 
-        const versionInfo = document.getElementById("version-info");
-        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(versionInfo);
+        // Settings elemanını haritanın üzerine ekle
+        const settingsElement = document.getElementById('settingsContainer'); // Ayar butonlarının bulunduğu div
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(settingsElement);
+        // Filtreleme elemanını haritanın üzerine ekle
+        const filterElement = document.getElementById('filterContainer'); // Filtrelerin bulunduğu div
+        map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterElement);
     }
 
     return {

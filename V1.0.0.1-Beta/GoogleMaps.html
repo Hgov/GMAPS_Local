@@ -24,9 +24,9 @@
 <body>
 
   <div id="mainContent" class="container-fluid">
-    <div class="row">
+    <div class="row" id="settingsContainer">
       <div class="d-flex gap-2 mb-3">
-        <button type="button" class="btn btn-primary" onclick="Google.MapObject.FilterShowHide()">
+        <button type="button" class="filter-button" onclick="Google.MapObject.FilterShowHide()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel"
             viewBox="0 0 16 16">
             <path
@@ -35,7 +35,7 @@
           </svg>
           Filter
         </button>
-        <button type="button" class="btn btn-primary" onclick="Google.MapObject.GoogleSettingsRedirect()">
+        <button type="button" class="customsettings-button" onclick="Google.MapObject.GoogleSettingsRedirect()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear"
             viewBox="0 0 16 16">
             <path
@@ -47,120 +47,99 @@
       </div>
     </div>
 
-    <div class="row">
-
-      <!-- 1 filter -->
-      <div class="col-sm-3 filter-items" style="display: none;">
-        <div class="card border-0">
-          <article class="card-group-item">
-            <div class="filter-content">
-              <div class="card-body">
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="js-filter-multiple-city" class="control-label mb-1">City:</label>
-                    <select class="form-control" id="js-filter-multiple-city" name="states[]" style="width: 100%;"
-                      multiple="multiple">
-                    </select>
+    <div id="filterContainer" class="row" style="width: 50%;">
+      <div class="col-sm-6">
+        <!-- Branch Filter -->
+        <div class="filter-items" style="display: none;">
+          <div class="card border-0">
+            <article class="card-group-item">
+              <div class="filter-content">
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="js-filter-multiple-branch" class="control-label mb-1">Branch:</label>
+                      <select class="form-control" id="js-filter-multiple-branch" name="branches[]" style="width: 100%;"
+                        multiple="multiple">
+                      </select>
+                    </div>
                   </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="js-filter-multiple-county" class="control-label mb-1">County:</label>
-                    <select class="form-control" id="js-filter-multiple-county" name="states[]" style="width: 100%;"
-                      multiple="multiple">
-                    </select>
+                  <br/>
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="js-filter-multiple-city" class="control-label mb-1">City:</label>
+                      <select class="form-control" id="js-filter-multiple-city" name="states[]" style="width: 100%;"
+                        multiple="multiple">
+                      </select>
+                    </div>
                   </div>
-                </div>
-              </div> <!-- card-body.// -->
-            </div>
-          </article> <!-- card-group-item.// -->
-        </div> <!-- card.// -->
-
-      </div> <!-- col.// -->
-
-      <!-- 2 filter -->
-      <div class="col-sm-3 filter-items" style="display: none;">
-        <div class="card border-0">
-          <article class="card-group-item">
-            <div class="filter-content">
-              <div class="card-body">
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="js-filter-multiple-user" class="control-label mb-1">User:</label>
-                    <select class="form-control" id="js-filter-multiple-user" name="states[]" style="width: 100%;"
-                      multiple="multiple">
-                    </select>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="js-filter-single-appointment" class="control-label mb-1">Visit:</label>
-                    <select class="form-control" id="js-filter-single-appointment" name="js-filter-single-appointment"
-                      style="width: 100%;" name="state">
-                      <option value="0">Visited</option>
-                      <option value="1">Unvisited</option>
-                      <option value="2" selected>All</option>
-                    </select>
-                  </div>
-                </div>
-              </div> <!-- card-body.// -->
-            </div>
-          </article> <!-- card-group-item.// -->
-        </div> <!-- card.// -->
-
-      </div> <!-- col.// -->
-
-      <!-- 3 filter -->
-      <div class="col-sm-3 filter-items" style="display: none;">
-        <div class="card border-0">
-          <article class="card-group-item">
-            <div class="filter-content">
-              <div class="card-body">
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="dtappointmentstart" class="control-label mb-1">Start Date:</label>
-                    <input type="date" id="dtappointmentstart" name="dtappointmentstart"
-                      class="form-control col-sm-8 dtappointment" style="width: 100%;" disabled="disabled" />
-                  </div>
-                  <div class="form-group col-md-12">
-                    <label for="dtappointmentend" class="control-label mb-1">End Date:</label>
-                    <input type="date" id="dtappointmentend" name="dtappointmentend"
-                      class="form-control col-sm-8 dtappointment" style="width: 100%;" disabled="disabled" />
-                  </div>
-                </div>
-              </div> <!-- card-body.// -->
-            </div>
-          </article> <!-- card-group-item.// -->
-        </div> <!-- card.// -->
-
-      </div> <!-- col.// -->
-      <!-- Branch Filter -->
-      <div class="col-sm-3 filter-items" style="display: none;">
-        <div class="card border-0">
-          <article class="card-group-item">
-            <div class="filter-content">
-              <div class="card-body">
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="js-filter-multiple-branch" class="control-label mb-1">Branch:</label>
-                    <select class="form-control" id="js-filter-multiple-branch" name="branches[]" style="width: 100%;"
-                      multiple="multiple">
-                    </select>
+                  <br/>
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="js-filter-multiple-county" class="control-label mb-1">County:</label>
+                      <select class="form-control" id="js-filter-multiple-county" name="states[]" style="width: 100%;"
+                        multiple="multiple">
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </article>
+            </article>
+          </div>
         </div>
+      </div>
+      <div class="col-sm-6">
+        <!-- 2 filter -->
+        <div class="filter-items" style="display: none;">
+          <div class="card border-0">
+            <article class="card-group-item">
+              <div class="filter-content">
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="js-filter-multiple-user" class="control-label mb-1">User:</label>
+                      <select class="form-control" id="js-filter-multiple-user" name="states[]" style="width: 100%;"
+                        multiple="multiple">
+                      </select>
+                    </div>
+                  </div>
+                  <br/>
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="js-filter-single-appointment" class="control-label mb-1">Visit:</label>
+                      <select class="form-control" id="js-filter-single-appointment" name="js-filter-single-appointment"
+                        style="width: 100%;" name="state">
+                        <option value="0">Visited</option>
+                        <option value="1">Unvisited</option>
+                        <option value="2" selected>All</option>
+                      </select>
+                    </div>
+                  </div>
+                  <br/>
+                  <div class="form-row">
+                    <div class="form-group col-md-12">
+                      <label for="dtappointmentstart" class="control-label mb-1">Start Date:</label>
+                      <input type="date" id="dtappointmentstart" name="dtappointmentstart"
+                        class="form-control col-sm-8 dtappointment" style="width: 100%;" disabled="disabled" />
+                    </div>
+                    <br/>
+                    <div class="form-group col-md-12">
+                      <label for="dtappointmentend" class="control-label mb-1">End Date:</label>
+                      <input type="date" id="dtappointmentend" name="dtappointmentend"
+                        class="form-control col-sm-8 dtappointment" style="width: 100%;" disabled="disabled" />
+                    </div>
+                  </div>
+                </div> <!-- card-body.// -->
+              </div>
+            </article> <!-- card-group-item.// -->
+          </div> <!-- card.// -->
+
+        </div> <!-- col.// -->
       </div>
     </div> <!-- row.// -->
 
     <div class="row" style="height:90%">
       <div class="col-lg-12">
         <div id="map"></div>
-        <div id="version-info" class="versioninfo">
-          V 5.1.1
-        </div>
       </div>
     </div>
   </div>
@@ -206,10 +185,10 @@
             <input type="number" id="cityRadiusSizeNumber" value="20000" class="form-control">
           </div>
 
-           <!-- County radius size -->
-           <div class="form-group mb-3">
+          <!-- County radius size -->
+          <div class="form-group mb-3">
             <label for="countyRadiusSizeNumber">City Radius Size:</label>
-            <input type="number" id="countyRadiusSizeNumber"  value="5000" class="form-control">
+            <input type="number" id="countyRadiusSizeNumber" value="5000" class="form-control">
           </div>
 
           <!-- Default Circle Color -->

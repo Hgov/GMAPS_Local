@@ -55,7 +55,7 @@ Google.MapObject = (function () {
             // `map` ve `latLng` değişkenlerine erişim
             map = Google.MapLoader.getMap();
             latLng = Google.MapLoader.getLatLng();
-            const { AdvancedMarkerElement } = google.maps.importLibrary("marker");
+            //const { AdvancedMarkerElement } = google.maps.importLibrary("marker");
             /**constructure end */
 
             /* installation Start*/
@@ -256,7 +256,7 @@ Google.MapObject = (function () {
                         var validationLng = systemUserSettings[0].country[0].center.lng;
                         if (validationLat != null && validationLng != null) {
                             map.setCenter(systemUserSettings[0].country[0].center); // Ülke merkezi belirli bir konuma ayarlanır
-                            map.setZoom(6.5);
+                            map.setZoom(6);
                         } else {
                             map.setZoom(2); // Geçerli bir konum yoksa varsayılan zoom seviyesi
                         }
@@ -265,8 +265,6 @@ Google.MapObject = (function () {
                         map.setCenter(latLng); // Varsayılan konuma ayarlar
                     }
                 }, 1000);
-            }).finally(() => {
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini açar
             });
 
             /* installation End*/
@@ -281,11 +279,11 @@ Google.MapObject = (function () {
                 let zoom = parseInt(map.getZoom());
 
                 mapLabelCities.forEach(mapLabelCity => {
-                    mapLabelCity.set('fontSize',zoom * 3);
+                    mapLabelCity.set('fontSize', zoom * 3);
                 });
 
                 mapLabelCounties.forEach(mapLabelCounty => {
-                    mapLabelCounty.set('fontSize',zoom * 3);
+                    mapLabelCounty.set('fontSize', zoom * 3);
                 });
 
                 // Eğer filtrelenmiş şubeler varsa, onların marker'larını harita üzerinde tut.
@@ -297,8 +295,8 @@ Google.MapObject = (function () {
                     }
                 } else {
                     // Eğer filtrelenmiş bir şube yoksa, şehir ve ilçe bazlı işaretçileri yönet.
-                    // Zoom seviyesi 9 ve altına indiğinde:
-                    if (zoom <= 9) {
+                    // Zoom seviyesi 8 ve altına indiğinde:
+                    if (zoom < 8.5) {
                         // Şehir daireleri eklenmemişse, ekle.
                         if (cityCircles.length === 0) {
                             createCityCircles(cityList);
@@ -314,13 +312,13 @@ Google.MapObject = (function () {
                         // Şube detay panelini gizle.
                         hideBranchDetailsPanel();
                     } else {
-                        // Zoom seviyesi 9'u geçtiğinde, şehir dairelerini kaldır.
+                        // Zoom seviyesi 8.5'u geçtiğinde, şehir dairelerini kaldır.
                         removeCityCircles(cityCircles);
                         removeCityInfoWindows();
                     }
 
                     // Zoom seviyesi 10 ile 12 arasındaysa:
-                    if (zoom >= 10 && zoom <= 12) {
+                    if (zoom >= 8.5 && zoom < 12) {
                         // İlçe daireleri eklenmemişse, ekle.
                         if (countyCircles.length === 0) {
                             createCountyCircles(countyList);
@@ -331,8 +329,8 @@ Google.MapObject = (function () {
                         removeCityInfoWindows();
                     }
 
-                    // Zoom seviyesi 13 ve üstüne çıktığında:
-                    if (zoom >= 13) {
+                    // Zoom seviyesi 12 ve üstüne çıktığında:
+                    if (zoom >= 12) {
                         // İlçe daireleri ve info windows'ları kaldır.
                         removeCountyCircles(countyCircles);
                         removeCountyInfoWindows();
@@ -343,7 +341,7 @@ Google.MapObject = (function () {
                             generateBranchMarkers(); // Marker'ları oluştur
                         }
                     } else {
-                        // Eğer zoom seviyesi 13'ten küçükse, şube marker'larını kaldır.
+                        // Eğer zoom seviyesi 12'ten küçükse, şube marker'larını kaldır.
                         clearBranchMarkers();
                     }
                 }
@@ -465,15 +463,13 @@ Google.MapObject = (function () {
                         cityCircles[counter].addListener('click', function (mapsMouseEvent) {
                             var position = new google.maps.LatLng(mapsMouseEvent.latLng);
                             map.setCenter(position);
-                            map.setZoom(10);
+                            map.setZoom(8.5);
                         });
                         mapLabelCities.push(mapLabelCity);
                         counter++;
                     });
                 }
-                return Promise.resolve(citiesLoading()).finally(() => {
-                    //openCityInfoWindows();
-                });
+                return Promise.resolve(citiesLoading());
             }
 
             /**
@@ -497,7 +493,7 @@ Google.MapObject = (function () {
                         countyCircles[counter].addListener('click', function (mapsMouseEvent) {
                             var position = new google.maps.LatLng(mapsMouseEvent.latLng);
                             map.setCenter(position);
-                            map.setZoom(13);
+                            map.setZoom(12);
                         });
                         mapLabelCounty = new MapLabel({
                             text: branchesCountSingle,
@@ -515,9 +511,7 @@ Google.MapObject = (function () {
                         counter++;
                     });
                 }
-                return Promise.resolve(countiesLoading()).finally(() => {
-                    //openCountyInfoWindows();
-                });
+                return Promise.resolve(countiesLoading());
             }
 
             // /**
@@ -1019,57 +1013,6 @@ Google.MapObject = (function () {
             }
 
             /**
-            * Harita üzerindeki şehir bilgi pencerelerini (InfoWindows) açar.
-            * 
-            * 1. Haritanın yakınlaştırma seviyesini kontrol eder.
-            * 2. Eğer zoom seviyesi 9 veya daha düşükse, bilgi pencerelerini açar ve haritayı merkezden kaldırır.
-            * 3. Geçici olarak haritanın gesture handling davranışını "none" olarak ayarlar, ardından tekrar "greedy" olarak geri alır.
-            */
-            function openCityInfoWindows() {
-                let zoom = parseInt(map.getZoom());
-                var iw = () => {
-                    if (zoom <= 9) {
-                        map.gestureHandling = "none";
-                        cityInfoWindows.forEach(element => {
-                            element.open(map);
-                            map.setCenter(null);
-                        });
-                    }
-                }
-                return Promise.resolve(iw()).finally(() => {
-                    if (zoom <= 9) {
-                        map.gestureHandling = "greedy";
-                    }
-                });
-            }
-
-            /**
-            * Harita üzerindeki ilçe bilgi pencerelerini (InfoWindows) açar.
-            * 
-            * 1. Haritanın yakınlaştırma seviyesini kontrol eder.
-            * 2. Eğer zoom seviyesi 10 ile 12 arasındaysa, bilgi pencerelerini açar ve haritayı merkezden kaldırır.
-            * 3. Geçici olarak haritanın gesture handling davranışını "none" olarak ayarlar, ardından tekrar "greedy" olarak geri alır.
-            */
-            function openCountyInfoWindows() {
-                let zoom = parseInt(map.getZoom());
-
-                var iw = () => {
-                    if (zoom >= 10 && zoom <= 12) {
-                        map.gestureHandling = "none";
-                        countyInfoWindows.forEach(element => {
-                            element.open(map);
-                            map.setCenter(null);
-                        });
-                    }
-                }
-                return Promise.resolve(iw()).finally(() => {
-                    if (zoom >= 10 && zoom <= 12) {
-                        map.gestureHandling = "greedy";
-                    }
-                });
-            }
-
-            /**
             * Tüm şube işaretleyicilerini (branchMarkers) belirli bir harita nesnesine (`map`) atar.
             * 
             * @param {object} map - Harita nesnesi.
@@ -1167,8 +1110,6 @@ Google.MapObject = (function () {
                     // Eğer şube seçimi yoksa, haritayı başlangıç duruma döndür
                     createCityCircles(cityList); // Tüm şehir dairelerini oluştur
                     createCountyCircles(countyList); // Tüm ilçe dairelerini oluştur
-                    //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                    //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 }
 
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
@@ -1185,8 +1126,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1199,8 +1138,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1213,8 +1150,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
-                //openCountyInfoWindows(); // İlçe bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
 
@@ -1238,7 +1173,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1269,7 +1203,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1283,7 +1216,6 @@ Google.MapObject = (function () {
                 createCountyCircles(countyList); // İlçe dairelerini oluştur
                 clearBranchMarkers(); // Şube işaretleyicilerini kaldır
                 hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                //openCityInfoWindows(); // Şehir bilgi pencerelerini aç
                 map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
                 return;
             });
@@ -1325,8 +1257,7 @@ Google.MapObject = (function () {
 
                 // Haritayı güncelleme işlemi değişikliklerin geçerli olması için
                 map.setCenter(map.getCenter());
-                map.setZoom(13);
-                map.setZoom(6.5);
+                map.setZoom(map.getZoom());
             });
         },
 
