@@ -204,3 +204,73 @@ body {
   background-color: #e0e0e0; /* Tıklanınca arka plan rengi */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Tıklanınca gölge derinliği azalır */
 }
+
+/* Başlangıçta filtre panelini gizle */
+.filter-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 5;
+  max-height: 80vh;
+  overflow-y: auto;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: scale(0); /* Panel başlangıçta küçültülmüş */
+  opacity: 0; /* Başlangıçta görünmez */
+}
+
+/* Panel görünürken */
+.filter-panel.open {
+  transform: scale(1); /* Normal boyuta getir */
+  opacity: 1; /* Görünür yap */
+}
+
+/* Form elemanlarının genel stili */
+.filter-panel select,
+.filter-panel input[type="date"] {
+  width: 100%; /* Genişlik tam olsun */
+  padding: 8px; /* İçerik çevresinde boşluk */
+  margin-bottom: 10px; /* Altında biraz boşluk */
+  border: 1px solid #ddd; /* İnce bir kenar çizgisi */
+  border-radius: 5px; /* Köşeleri yuvarlat */
+  background-color: #f9f9f9; /* Hafif gri arka plan */
+  font-family: Arial, sans-serif; /* Google Maps benzeri font */
+  font-size: 14px;
+}
+
+/* Filtre başlıklarının stili */
+.filter-panel label {
+  font-weight: bold; /* Başlıkları belirginleştir */
+  font-size: 14px; /* Font boyutunu biraz artır */
+  margin-bottom: 5px; /* Başlık altında boşluk */
+  display: block;
+}
+
+/* Filtreleme butonlarının harita üzerindeki stili */
+.filter-button {
+  background-color: #fff; /* Beyaz arka plan */
+  border: none; /* Çerçevesiz görünüm */
+  padding: 10px; /* İçerik çevresinde boşluk */
+  border-radius: 50%; /* Daire şekli */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
+  transition: background-color 0.3s, transform 0.3s; /* Hover etkisi için geçiş animasyonu */
+  cursor: pointer; /* İmleci el simgesi yap */
+}
+
+.filter-button:hover {
+  background-color: #e0e0e0; /* Üzerine gelindiğinde hafif gri */
+  transform: scale(1.1); /* Üzerine gelindiğinde biraz büyüt */
+}
+
+/* Mobil için stil düzenlemeleri */
+@media only screen and (max-width: 768px) {
+  .filter-panel {
+      width: 90%; /* Mobilde genişlik daha fazla olsun */
+      right: 5%; /* Sağa yakınlaşsın */
+      top: 10px; /* Yukarıdan daha az boşluk bırak */
+  }
+}

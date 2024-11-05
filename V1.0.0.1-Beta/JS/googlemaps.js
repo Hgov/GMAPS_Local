@@ -1308,11 +1308,13 @@ Google.MapObject = (function () {
             window.open(url, '_blank');
         },
 
-        FilterShowHide: function () {
-            // filterDivShowHide değeri tersine çevrilir
-            filterDivShowHide = !filterDivShowHide;
-            // .filter-items elementlerini gösterir veya gizler
-            $('.filter-items').toggle(filterDivShowHide);
+        ToggleFilterPanel: function () {
+            const filterPanel = document.getElementById('filterContainer');
+            if (!filterPanel.classList.contains('open')) {
+                filterPanel.classList.add('open');
+            } else {
+                filterPanel.classList.remove('open');
+            }
         },
 
         GoogleSettingsRedirect: function () {
