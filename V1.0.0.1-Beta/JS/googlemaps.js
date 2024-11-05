@@ -1223,7 +1223,7 @@ Google.MapObject = (function () {
             // Renk ayarı ekleme için event handler
             $(document).on('click', '#addColorSetting', function () {
                 const newIndex = $('#colorSettingsContainer').children().length;
-                $('#colorSettingsContainer').append(createColorSettingElement({ min: 0, maks: 0, colorcode: '#000000' }, newIndex));
+                $('#colorSettingsContainer').append(GMaps.createColorSettingElement({ min: 0, maks: 0, colorcode: '#000000' }, newIndex));
             });
 
             // Renk ayarı silme için event handler
@@ -1256,20 +1256,21 @@ Google.MapObject = (function () {
                 $('#GoogleSettingsModal').modal('hide');
 
                 // Haritayı güncelleme işlemi değişikliklerin geçerli olması için
-                map.setCenter(map.getCenter());
-                map.setZoom(map.getZoom());
+                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
+                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
+                createCityCircles(cityList); // Şehir dairelerini oluştur
+                createCountyCircles(countyList); // İlçe dairelerini oluştur
+                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
+                hideBranchDetailsPanel(); // Yanıt div'ini gizle
+                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
             });
         },
-
         ClosebranchDetailsDiv: function (e) {
             document.getElementById("branchDetailsContentElement-container").style.display = 'none';
         },
-
         branchInfo: function (e) {
             window.open('branchdetail.html?branch_id=' + $(e).data("id"), '_blank');
         },
-
-        // Panel açma/kapatma fonksiyonları
         openAppointmentPanel: function (e) {
             // Parametrelerden ID ve adı al
             var branchId = $(e).data("id");
@@ -1282,32 +1283,26 @@ Google.MapObject = (function () {
             $('#appointmentPanel').show();
             $('#mainContent').addClass('openPanel');
         },
-
         closeAppointmentPanel: function (e) {
             $('#appointmentPanel').hide();
             $('#mainContent').removeClass('openPanel');
         },
-
-        // Randevu kaydetme işlemleri
         saveAppointment: function (e) {
             // Burada randevu kaydetme işlemleri yapılır
             alert('Appointment saved successfully!');
             this.closeAppointmentPanel(); // İşlem sonrası paneli kapat
         },
-
         DetailAppointment: function (e) {
             // Tıklanan butondan ID'yi alıyoruz
             var appointmentId = $(e).data("id");
             // Kullanıcıyı appointment.html sayfasına yönlendiriyoruz, ID'yi query string olarak ekliyoruz
             window.open('appointment.html?id=' + appointmentId, '_blank');
         },
-
         CreateRoute: function (e) {
             var destination = $(e).data("destination");
             var url = "https://www.google.com/maps/dir/?api=1&destination=" + destination + "&travelmode=driving";
             window.open(url, '_blank');
         },
-
         ToggleFilterPanel: function () {
             const filterPanel = document.getElementById('filterContainer');
             if (!filterPanel.classList.contains('open')) {
@@ -1316,7 +1311,6 @@ Google.MapObject = (function () {
                 filterPanel.classList.remove('open');
             }
         },
-
         GoogleSettingsRedirect: function () {
             // Modal açılmadan önce mevcut googleSettings verilerini modal'a yükle
             $('#defaultcirclecolorcode').val(googleSettings[0].defaultcirclecolorcode);
@@ -1343,8 +1337,6 @@ Google.MapObject = (function () {
             // Modal'ı aç
             $('#GoogleSettingsModal').modal('show');
         },
-
-        // Color Setting item oluşturma fonksiyonu
         createColorSettingElement: function (setting, index) {
             return `
         <div class="color-setting-item mb-2" data-index="${index}">
@@ -1365,7 +1357,6 @@ Google.MapObject = (function () {
         </div>
         `;
         }
-
     }
 
     return GMaps;

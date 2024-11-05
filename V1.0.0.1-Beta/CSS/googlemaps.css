@@ -154,7 +154,7 @@ body {
 }
 
 .filter-button {
-  margin: 7px;
+  margin: 10px;
   background-color: #ffffff; /* Beyaz arka plan */
   border: 1px solid rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
   border-radius: 3px; /* Köşeleri yuvarla */
@@ -180,7 +180,7 @@ body {
 }
 
 .customsettings-button {
-  margin: 7px;
+  margin: 10px;
   background-color: #ffffff; /* Beyaz arka plan */
   border: 1px solid rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
   border-radius: 3px; /* Köşeleri yuvarla */
