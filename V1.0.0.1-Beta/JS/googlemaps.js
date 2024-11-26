@@ -48,13 +48,28 @@ Google.MapObject = (function () {
             /**Global Variables End */
 
             /** constructure */
-            //displayMapHide();
-
-            Google.MapLoader.initMap(39.9334, 32.8597); // Harita yüklemesini başlatıyor
-
+            // Harita yüklemesini başlatıyor
             // `map` ve `latLng` değişkenlerine erişim
-            map = Google.MapLoader.getMap();
-            latLng = Google.MapLoader.getLatLng();
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: latLng,
+                //zoom: 6,
+                panControl: false,
+                mapTypeControl: true,
+                scaleControl: false,
+                streetViewControl: false,
+                overviewMapControl: false,
+                rotateControl: false,
+                gestureHandling: "greedy",
+                zoomControl: true,
+            });
+    
+            // Settings elemanını haritanın üzerine ekle
+            const settingsElement = document.getElementById('settingsContainer'); // Ayar butonlarının bulunduğu div
+            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(settingsElement);
+            // Filtreleme elemanını haritanın üzerine ekle
+            const filterElement = document.getElementById('filterContainer'); // Filtrelerin bulunduğu div
+            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterElement);
+
             //const { AdvancedMarkerElement } = google.maps.importLibrary("marker");
             /**constructure end */
 
@@ -273,6 +288,7 @@ Google.MapObject = (function () {
 
             map.addListener("click", (e) => {
                 hideBranchDetailsPanel();
+                //this.ToggleFilterPanel();
             });
 
             map.addListener('zoom_changed', function () {
