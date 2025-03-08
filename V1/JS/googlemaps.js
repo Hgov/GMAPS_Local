@@ -47,8 +47,6 @@ Google.MapObject = (function () {
             /**Global Variables End */
 
             /** constructure */
-            // Harita yüklemesini başlatıyor
-            // `map` ve `latLng` değişkenlerine erişim
             map = new google.maps.Map(document.getElementById('map'), {
                 center: latLng,
                 //zoom: 6,
@@ -62,24 +60,12 @@ Google.MapObject = (function () {
                 zoomControl: true,
             });
     
-            // Settings elemanını haritanın üzerine ekle
-            const settingsElement = document.getElementById('settingsContainer'); // Ayar butonlarının bulunduğu div
+            const settingsElement = document.getElementById('settingsContainer'); 
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(settingsElement);
-            // Filtreleme elemanını haritanın üzerine ekle
-            const filterElement = document.getElementById('filterContainer'); // Filtrelerin bulunduğu div
+            const filterElement = document.getElementById('filterContainer'); 
             map.controls[google.maps.ControlPosition.TOP_RIGHT].push(filterElement);
 
-            //const { AdvancedMarkerElement } = google.maps.importLibrary("marker");
-            /**constructure end */
-
-            /* installation Start*/
-
-            /**
-            * MapLabel, harita üzerinde etiket (label) oluşturmak için kullanılan bir yapıcı fonksiyondur.
-            * Optik seçenekleri (opt_options) kabul eder ve başlangıç değerlerini ayarlar.
-            * 
-            * @param {object} opt_options - Harita etiketi için başlangıç seçenekleri.
-            */
+           
             function MapLabel(opt_options) {
                 this.set('fontFamily', 'sans-serif'); // Yazı tipi ailesi
                 this.set('fontSize', 12); // Yazı tipi boyutu
@@ -92,15 +78,10 @@ Google.MapObject = (function () {
                 this.setValues(opt_options); // Geçilen seçenekleri ayarlar
             }
 
-            // MapLabel sınıfını google.maps.OverlayView sınıfından türetir
             MapLabel.prototype = new google.maps.OverlayView;
 
             window['MapLabel'] = MapLabel;
 
-            /**
-             * Harita etiketi üzerinde yapılan değişikliklere göre yeniden çizim yapar.
-             * @param {string} prop - Değişen özellik adı.
-             */
             MapLabel.prototype.changed = function (prop) {
                 switch (prop) {
                     case 'fontFamily':
@@ -118,9 +99,6 @@ Google.MapObject = (function () {
                 }
             };
 
-            /**
-             * Canvas üzerinde harita etiketini çizer.
-             */
             MapLabel.prototype.drawCanvas_ = function () {
                 var canvas = this.canvas_;
                 if (!canvas) return;
@@ -151,9 +129,6 @@ Google.MapObject = (function () {
                 }
             };
 
-            /**
-             * Harita etiketi eklendiğinde çalışır, canvas elementini oluşturur ve paneye ekler.
-             */
             MapLabel.prototype.onAdd = function () {
                 var canvas = this.canvas_ = document.createElement('canvas');
                 var style = canvas.style;
@@ -173,12 +148,6 @@ Google.MapObject = (function () {
 
             MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
 
-            /**
-             * Metnin hizalamasına göre sol marjin (margin) değerini döner.
-             * 
-             * @param {number} textWidth - Metnin genişliği.
-             * @return {number} - Sol marjin değeri.
-             */
             MapLabel.prototype.getMarginLeft_ = function (textWidth) {
                 switch (this.get('align')) {
                     case 'left':
@@ -189,19 +158,14 @@ Google.MapObject = (function () {
                 return textWidth / -2; // Ortalanmışsa genişliğin yarısını negatif olarak döner
             };
 
-            /**
-             * Harita etiketi için yeniden çizim yapar.
-             */
             MapLabel.prototype.draw = function () {
                 var projection = this.getProjection();
 
                 if (!projection) {
-                    // Harita projeksiyonu hazır değilse hiçbir şey yapma
                     return;
                 }
 
                 if (!this.canvas_) {
-                    // onAdd henüz çağrılmamışsa hiçbir şey yapma
                     return;
                 }
 
@@ -221,11 +185,6 @@ Google.MapObject = (function () {
 
             MapLabel.prototype['draw'] = MapLabel.prototype.draw;
 
-            /**
-             * Etiketin görünürlüğünü kontrol eder. Min ve max zoom seviyelerine göre görünürlüğü belirler.
-             * 
-             * @return {string} - Etiketin görünür olup olmadığını belirten değer ('hidden' veya '').
-             */
             MapLabel.prototype.getVisible_ = function () {
                 var minZoom = /** @type number */(this.get('minZoom'));
                 var maxZoom = /** @type number */(this.get('maxZoom'));
@@ -246,9 +205,6 @@ Google.MapObject = (function () {
                 return ''; // Aksi halde görünür yapar
             };
 
-            /**
-             * Harita etiketi kaldırıldığında canvas elementini DOM'dan çıkarır.
-             */
             MapLabel.prototype.onRemove = function () {
                 var canvas = this.canvas_;
                 if (canvas && canvas.parentNode) {
@@ -258,11 +214,6 @@ Google.MapObject = (function () {
 
             MapLabel.prototype['onRemove'] = MapLabel.prototype.onRemove;
 
-            /**
-             * Harita üzerindeki şehir çemberlerini ve şube detaylarını oluşturur.
-             * 
-             * @return {Promise} - Şehir çemberlerinin ve şube detaylarının oluşturulmasını bekler.
-             */
             Promise.all([createCityCircles(cityList), createBranchDetailsContainer()]).then(values => {
                 setTimeout(() => {
                     if (systemUserSettings[0].country.length != 0) {
@@ -281,10 +232,6 @@ Google.MapObject = (function () {
                 }, 1000);
             });
 
-            /* installation End*/
-
-            /* Methods Start*/
-
             map.addListener("click", (e) => {
                 hideBranchDetailsPanel();
                 //this.ToggleFilterPanel();
@@ -301,88 +248,59 @@ Google.MapObject = (function () {
                     mapLabelCounty.set('fontSize', zoom * 3);
                 });
 
-                // Eğer filtrelenmiş şubeler varsa, onların marker'larını harita üzerinde tut.
                 if (IsSelectedItemsBranches.length > 0) {
                     clearBranchMarkers();
-                    // Eğer marker'lar henüz eklenmemişse, filtrelenmiş şube marker'larını ekle.
                     if (branchMarkers.length === 0) {
                         generateBranchMarkers();
                     }
                 } else {
-                    // Eğer filtrelenmiş bir şube yoksa, şehir ve ilçe bazlı işaretçileri yönet.
-                    // Zoom seviyesi 8 ve altına indiğinde:
                     if (zoom < 8.5) {
-                        // Şehir daireleri eklenmemişse, ekle.
                         if (cityCircles.length === 0) {
                             createCityCircles(cityList);
                         }
 
-                        // İlçe dairelerini ve ilçe info windows'larını kaldır.
                         removeCountyCircles(countyCircles);
                         removeCountyInfoWindows();
 
-                        // Şube marker'larını kaldır.
                         clearBranchMarkers();
 
-                        // Şube detay panelini gizle.
                         hideBranchDetailsPanel();
                     } else {
-                        // Zoom seviyesi 8.5'u geçtiğinde, şehir dairelerini kaldır.
                         removeCityCircles(cityCircles);
                         removeCityInfoWindows();
                     }
 
-                    // Zoom seviyesi 10 ile 12 arasındaysa:
                     if (zoom >= 8.5 && zoom < 12) {
-                        // İlçe daireleri eklenmemişse, ekle.
                         if (countyCircles.length === 0) {
                             createCountyCircles(countyList);
                         }
 
-                        // Şehir dairelerini ve şehir info windows'larını kaldır.
                         removeCityCircles(cityCircles);
                         removeCityInfoWindows();
                     }
 
-                    // Zoom seviyesi 12 ve üstüne çıktığında:
                     if (zoom >= 12) {
-                        // İlçe daireleri ve info windows'ları kaldır.
                         removeCountyCircles(countyCircles);
                         removeCountyInfoWindows();
 
-                        // Şube marker'ları eklenmemişse, şubeleri marker olarak ekle.
                         if (branchMarkers.length === 0) {
                             filterAllBranches(); // Şubeleri filtrele
                             generateBranchMarkers(); // Marker'ları oluştur
                         }
                     } else {
-                        // Eğer zoom seviyesi 12'ten küçükse, şube marker'larını kaldır.
                         clearBranchMarkers();
                     }
                 }
             });
 
-            /**
-            * Şube detaylarını gösteren div'i ekranda görünür hale getirir.
-            */
             function displayBranchDetails() {
                 branchDetailsContainer.style.display = "block"; // branchDetailsContainer'i görünür yapar
             }
 
-            /**
-             * Şube detaylarını gösteren div'i ekranda gizler.
-             */
             function hideBranchDetailsPanel() {
                 branchDetailsContainer.style.display = "none"; // branchDetailsContainer'i gizler
             }
 
-            /**
-             * Şube detaylarını gösterecek olan div'i ve içeriğini oluşturur.
-             * 
-             * 1. branchDetailsContentElement adında bir <pre> elementi oluşturur ve içerik alanı olarak ayarlar.
-             * 2. branchDetailsContainer adında bir <div> elementi oluşturur ve içerik alanını içine ekler.
-             * 3. Oluşturulan div'i harita kontrolü olarak haritanın alt orta kısmına ekler.
-             */
             function createBranchDetailsContainer() {
                 branchDetailsContentElement = document.createElement("pre"); // Şube detayları için <pre> elementi oluşturur
                 branchDetailsContentElement.id = "branchDetailsContentElement"; // Elemente bir id atar
@@ -400,14 +318,6 @@ Google.MapObject = (function () {
                 map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(branchDetailsContainer); // Ana div'i haritanın sol alt köşesine yerleştirir
             }
 
-            /**
-             * Haritada gösterilecek çemberler (circles) için ayarları döner.
-             * 
-             * @param {number} filteredCount - Çember içinde gösterilecek şube sayısı.
-             * @param {object} position - Çemberin merkez pozisyonu.
-             * @param {boolean} radiusEditable - Çemberin yarıçapının düzenlenebilir olup olmadığı.
-             * @return {object} - Çember ayarlarını içeren bir nesne.
-             */
             function getCircleSettings(branchesCountSingle, position, radiusEditable, radiusSize) {
                 if (radiusEditable) {
                     let branchesCountCharacter = parseInt(branchesCountSingle).toString().length;
@@ -444,12 +354,6 @@ Google.MapObject = (function () {
                 return circlesettings;
             }
 
-            /**
-             * Haritada şehirleri temsil eden çemberleri (circles) oluşturur.
-             * 
-             * @param {Array} cityList - Şehir bilgilerini içeren dizi.
-             * @return {Promise} - Şehir çemberlerinin oluşturulma işlemi tamamlandığında çözülen bir promise döner.
-             */
             function createCityCircles(cityList) {
                 const citiesLoading = () => {
                     removeCityCircles(cityCircles);
@@ -487,12 +391,6 @@ Google.MapObject = (function () {
                 return Promise.resolve(citiesLoading());
             }
 
-            /**
-             * Haritada ilçeleri temsil eden çemberleri (circles) oluşturur.
-             * 
-             * @param {Array} countyList - İlçe bilgilerini içeren dizi.
-             * @return {Promise} - İlçe çemberlerinin oluşturulma işlemi tamamlandığında çözülen bir promise döner.
-             */
             function createCountyCircles(countyList) {
                 const countiesLoading = () => {
                     removeCountyCircles(countyCircles);
@@ -529,82 +427,7 @@ Google.MapObject = (function () {
                 return Promise.resolve(countiesLoading());
             }
 
-            // /**
-            // * AdvancedMarkerElement için ayarları döner.
-            // * 
-            // * @param {string} id - Marker'ın ID'si.
-            // * @param {string} title - Marker'ın başlığı.
-            // * @param {Array} appointment - Marker ile ilgili randevu bilgileri.
-            // * @param {string} user_fullname - Marker ile ilişkili kullanıcının tam adı.
-            // * @param {string} phone - Marker ile ilişkili telefon numarası.
-            // * @param {object} position - Marker'ın harita üzerindeki pozisyonu.
-            // * @param {object} map - Marker'ın ekleneceği harita nesnesi.
-            // * @return {object} - AdvancedMarkerElement ayarlarını içeren bir nesne.
-            // */
-            // function getAdvancedMarkerSettings(id, title, appointment, user_fullname, phone, position, map) {
-            //     // HTML içeriğini oluşturun
-            //     const content = document.createElement('div');
-            //     content.className = 'advanced-marker';
-            //     content.innerHTML = `
-            //                         <div><strong>${title}</strong></div>
-            //                         <div>${user_fullname}</div>
-            //                         <div>${phone}</div>
-            //                     `;
-
-            //     let markerSettings = {
-            //         position: position,
-            //         map: map,
-            //         content: content, // AdvancedMarkerElement için HTML içeriği
-            //         title: title
-            //     };
-
-            //     return markerSettings;
-            // }
-
-            // /**
-            // * Haritada şubeleri temsil eden AdvancedMarkerElement işaretleyicilerini oluşturur.
-            // */
-            // function generateBranchMarkers() {
-            //     clearBranchMarkers();
-            //     hideBranchDetailsPanel();
-
-            //     for (let i = 0; i < filteredBranches.length; i++) {
-            //         var userFullName = findUserById(filteredBranches[i].user_id).text;
-            //         var appointment = findAppointmentsByBranchId(filteredBranches[i].id);
-
-            //         // AdvancedMarkerElement oluşturma
-            //         const marker = new AdvancedMarkerElement(
-            //             getAdvancedMarkerSettings(filteredBranches[i].id, filteredBranches[i].name, appointment, userFullName, filteredBranches[i].phone, filteredBranches[i].position, map)
-            //         );
-
-            //         branchMarkers.push(marker);
-
-            //         // Marker tıklama olay dinleyicisi ekleme
-            //         marker.addEventListener('click', function (mapsMouseEvent) {
-            //             var position = mapsMouseEvent.latLng;
-            //             map.setCenter(position);
-            //             map.setZoom(16);
-
-            //             clearBranchMarkers();
-            //             hideBranchDetailsPanel();
-            //             generateBranchMarkers();
-            //             geocodeAndDisplayBranchDetails({ location: position }, branchMarkers[i]);
-            //         });
-            //     }
-            // }
-
-            /**
-            * Marker (işaretleyici) için ayarları döner.
-            * 
-            * @param {string} id - Marker'ın ID'si.
-            * @param {string} title - Marker'ın başlığı.
-            * @param {Array} appointment - Marker ile ilgili randevu bilgileri.
-            * @param {string} user_fullname - Marker ile ilişkili kullanıcının tam adı.
-            * @param {string} phone - Marker ile ilişkili telefon numarası.
-            * @param {object} position - Marker'ın harita üzerindeki pozisyonu.
-            * @param {object} map - Marker'ın ekleneceği harita nesnesi.
-            * @return {object} - Marker ayarlarını içeren bir nesne.
-            */
+           
             function generateMarkerSettings(id, title, appointment, user_fullname, phone, position, map) {
                 const icon = {
                     url: markerIcons[googleSettings[0].markericoncode],
@@ -621,9 +444,6 @@ Google.MapObject = (function () {
                 return markerSettings;
             }
 
-            /**
-             * Haritada şubeleri temsil eden işaretleyicileri (markers) oluşturur.
-             */
             function generateBranchMarkers() {
                 clearBranchMarkers(); // Mevcut marker'ları temizler
                 hideBranchDetailsPanel(); // Şube detay panelini gizler
@@ -637,18 +457,14 @@ Google.MapObject = (function () {
                     var userFullName = findUserById(filteredBranches[i].user_id)?.text || 'Unknown User';
                     var appointment = findAppointmentsByBranchId(filteredBranches[i].id);
 
-                    // Mevcut marker'ı kontrol et (aynı ID ile marker olup olmadığını kontrol et)
                     if (branchMarkers.some(marker => marker.id === filteredBranches[i].id)) {
-                        // Eğer aynı ID'ye sahip bir marker zaten varsa, tekrar ekleme
                         continue;
                     }
 
-                    // Marker oluşturma
                     var marker = new google.maps.Marker(generateMarkerSettings(filteredBranches[i].id, filteredBranches[i].text, appointment, userFullName, filteredBranches[i].phone, filteredBranches[i].position, map));
                     marker.id = filteredBranches[i].id; // Marker ID'si ekle
                     branchMarkers.push(marker);
 
-                    // Marker tıklama olay dinleyicisi ekleme
                     branchMarkers[i].addListener('click', function (mapsMouseEvent) {
                         var position = new google.maps.LatLng(mapsMouseEvent.latLng);
                         map.setCenter(position);
@@ -662,19 +478,11 @@ Google.MapObject = (function () {
                 }
             }
 
-            /**
-             * Haritadaki tüm şube işaretleyicilerini (markers) kaldırır.
-             */
             function clearBranchMarkers() {
                 assignMapToBranchMarkers(null);
                 branchMarkers = [];
             }
 
-            /**
-             * Haritadaki şehirleri temsil eden çemberleri (circles) kaldırır.
-             * 
-             * @param {Array} cityCircles - Şehir çemberlerini içeren dizi.
-             */
             function removeCityCircles(cityCircles) {
                 cityCircles.forEach(element => {
                     element.setMap(null);
@@ -682,11 +490,6 @@ Google.MapObject = (function () {
                 cityCircles.splice(0, cityCircles.length);
             }
 
-            /**
-             * Haritadaki ilçeleri temsil eden çemberleri (circles) kaldırır.
-             * 
-             * @param {Array} countyCircles - İlçe çemberlerini içeren dizi.
-             */
             function removeCountyCircles(countyCircles) {
                 countyCircles.forEach(element => {
                     element.setMap(null);
@@ -694,9 +497,6 @@ Google.MapObject = (function () {
                 countyCircles.splice(0, countyCircles.length);
             }
 
-            /**
-             * Haritadaki şehir bilgi pencerelerini (InfoWindows) kaldırır.
-             */
             function removeCityInfoWindows() {
                 cityInfoWindows.forEach(element => {
                     element.setMap(null);
@@ -704,9 +504,6 @@ Google.MapObject = (function () {
                 cityInfoWindows.splice(0, cityInfoWindows.length);
             }
 
-            /**
-             * Haritadaki ilçe bilgi pencerelerini (InfoWindows) kaldırır.
-             */
             function removeCountyInfoWindows() {
                 countyInfoWindows.forEach(element => {
                     element.setMap(null);
@@ -714,71 +511,33 @@ Google.MapObject = (function () {
                 countyInfoWindows.splice(0, countyInfoWindows.length);
             }
 
-            /**
-            * Verilen ID'ye göre kullanıcıyı bulur.
-            * 
-            * @param {string} id - Kullanıcı ID'si.
-            * @return {object|null} - İlgili kullanıcıyı içeren nesne veya null.
-            */
             function findUserById(id) {
                 return userList.find(user => user.id == id.toString()) || null;
             }
 
-            /**
-            * Verilen şube ID'sine göre randevuları bulur.
-            * 
-            * @param {string} branch_id - Şube ID'si.
-            * @return {Array} - İlgili şube için randevuları içeren bir dizi.
-            */
             function findAppointmentsByBranchId(branch_id) {
-                // Kontrol amaçlı log ekleyelim.
                 if (!branch_id) {
                     return []; // Eğer geçersiz bir ID geldiyse, boş bir dizi döndür.
                 }
 
-                // Şube ID'sine uygun olan randevuları filtrele.
                 const desiredAppointment = appointmentList.filter(appointment =>
                     appointment.branch_id.toString() === branch_id.toString()
                 );
                 return desiredAppointment; // Bulunan randevuların dizisi döndürülür.
             }
 
-            /**
-             * Şehirleri filtreler ve döner.
-             * 
-             * 1. Eğer `filteredCities` boşsa, tüm şehirleri (`cityList`) döner.
-             * 2. Eğer `filteredCities` doluysa, sadece filtrelenmiş şehirleri döner.
-             * 
-             * @return {Array} - Filtrelenmiş şehirler veya tüm şehirler.
-             */
             function getFilteredCities() {
                 return filteredCities.length === 0 ? cityList : filteredCities;
             }
 
-            /**
-             * İlçeleri filtreler ve döner.
-             * 
-             * 1. Eğer `filteredCounties` boşsa, tüm ilçeleri (`countyList`) döner.
-             * 2. Eğer `filteredCounties` doluysa, sadece filtrelenmiş ilçeleri döner.
-             * 
-             * @return {Array} - Filtrelenmiş ilçeler veya tüm ilçeler.
-             */
             function getFilteredCounties() {
                 return filteredCounties.length === 0 ? countyList : filteredCounties;
             }
 
-            /**
-             * Kullanıcıları filtreler ve döner.
-             * 
-             * @return {Array} - Filtrelenmiş kullanıcılar veya tüm kullanıcılar.
-             */
             function getFilteredUsers() {
                 return filteredUsers.length === 0 ? userList : filteredUsers;
             }
 
-            /**
-             * Şubeleri şehir bazında filtreler.
-             */
             function filterBranchesByCity() {
                 const citiesAssigment = getFilteredCities();
                 filteredBranches = branchList.filter(branch =>
@@ -786,9 +545,6 @@ Google.MapObject = (function () {
                 );
             }
 
-            /**
-             * Şubeleri ilçe bazında filtreler.
-             */
             function filterBranchesByCounty() {
                 const countiesAssigment = getFilteredCounties();
                 filteredBranches = filteredBranches.filter(branch =>
@@ -796,9 +552,6 @@ Google.MapObject = (function () {
                 );
             }
 
-            /**
-             * Şubeleri kullanıcı bazında filtreler.
-             */
             function filterBranchesByUser() {
                 const usersAssigment = getFilteredUsers();
                 filteredBranches = filteredBranches.filter(branch =>
@@ -806,9 +559,7 @@ Google.MapObject = (function () {
                 );
             }
 
-            // filteredBranches listesindeki şubeleri, randevu durumuna (visited veya unvisited) göre filtreler.
             function filterBranchesByAppointmentStatus() {
-                // Eğer ziyaret durumu visited olarak tanımlandıysa
                 if (appointmentStatusInput == appointmentStatus.visited) {
                     filteredBranches = filteredBranches.filter(branch => appointmentList.some(appointment =>
                         appointment.branch_id === branch.id &&
@@ -817,44 +568,27 @@ Google.MapObject = (function () {
                     ));
                 }
 
-                // Eğer ziyaret durumu unvisited olarak tanımlandıysa
                 else if (appointmentStatusInput == appointmentStatus.unvisited) {
                     filteredBranches = filteredBranches.filter(branch => !appointmentList.some(appointment =>
                         appointment.branch_id === branch.id
                     ));
                 } else {
-                    // Eğer ziyaret durumu all olarak tanımlandıysa
                     filteredBranches = branchList;
                 }
             }
 
-            /**
-             * Tüm filtreleme işlemlerini tek bir yerde uygular.
-             */
             function filterAllBranches() {
-                // İlk olarak şubeler listesini baştan yüklüyoruz.
                 filteredBranches = [...branchList];
-                //randevu durumuna göre filtreleme
                 filterBranchesByAppointmentStatus();
-                // Şehir ve ilçe bazında filtreleme
                 filterBranchesByCity();
                 filterBranchesByCounty();
-                // Kullanıcıya göre filtreleme
                 filterBranchesByUser();
             }
 
-            /**
-            * Kullanıcı, şehir, ilçe ve randevu durumlarına göre şubeleri filtreler.
-            * Filtreler boşsa tüm listeyi döner.
-            * 
-            * @param {Array} branches - Şube listesi.
-            * @return {Array} - Filtrelenmiş şube listesi.
-            */
             function getFilteredBranches(branches) {
                 let filtered = branches;
 
                 if (appointmentStatusInput) {
-                    // Eğer ziyaret durumu visited olarak tanımlandıysa
                     if (appointmentStatusInput == appointmentStatus.visited) {
                         filtered = filtered.filter(branch => appointmentList.some(appointment =>
                             appointment.branch_id === branch.id &&
@@ -863,13 +597,11 @@ Google.MapObject = (function () {
                         ));
                     }
 
-                    // Eğer ziyaret durumu unvisited olarak tanımlandıysa
                     else if (appointmentStatusInput == appointmentStatus.unvisited) {
                         filtered = filtered.filter(branch => !appointmentList.some(appointment =>
                             appointment.branch_id === branch.id
                         ));
                     } else {
-                        // Eğer ziyaret durumu all olarak tanımlandıysa
                         filtered = branchList;
                     }
 
@@ -895,47 +627,18 @@ Google.MapObject = (function () {
                 return filtered;
             }
 
-            /**
-             * Belirtilen bir ilçe ID'sine göre şubeleri sayar.
-             * 
-             * @param {string} countyid - Filtrelenecek ilçe ID'si.
-             * @return {number} - Bu ilçe ID'sine sahip şubelerin sayısı.
-             */
             function countBranchesByCounty(countyid) {
-                // Filtreleri uygulayarak şubeleri güncelle
                 const filtered = getFilteredBranches(branchList);
 
-                // İlçe ID'sine göre filtreleyip sayıyı döndür
                 return filtered.filter(branch => branch.county_id === countyid).length;
             }
 
-            /**
-             * Belirtilen bir şehir ID'sine göre şubeleri sayar.
-             * 
-             * @param {string} cityid - Filtrelenecek şehir ID'si.
-             * @return {number} - Bu şehir ID'sine sahip şubelerin sayısı.
-             */
             function countBranchesByCity(cityid) {
-                // Filtreleri uygulayarak şubeleri güncelle
                 const filtered = getFilteredBranches(branchList);
 
-                // Şehir ID'sine göre filtreleyip sayıyı döndür
                 return filtered.filter(branch => branch.city_id === cityid).length;
             }
 
-            /**
-            * Geocoding işlemi yaparak bir konum için haritayı merkeze alır ve ilgili şubenin bilgilerini görüntüler.
-            *         
-            * 1. Geocoder kullanarak verilen `request` için coğrafi konum bilgisini alır.
-            * 2. Haritayı (`map`) bu konum üzerine merkeze alır.
-            * 3. geocodeAndDisplayBranchDetails sonucu gelen adres bilgilerini kullanarak ilgili şubenin (`branchMarkers`) randevularını ve bilgilerini ekranda gösterir.
-            * 4. Şube ile ilgili bilgileri ve randevu detaylarını HTML formatında oluşturur ve `branchDetailsContentElement` div'ine ekler.
-            * 5. Randevu detayları varsa, randevu detay butonunu (`btnAppointmentDetails`) gösterir; yoksa gizler.
-            * 
-            * @param {object} request - geocodeAndDisplayBranchDetails işlemi için istek parametreleri.
-            * @param {object} branchMarkers - Harita üzerinde işaretlenmiş olan şubeye ait bilgiler.
-            * @return {Array} - geocodeAndDisplayBranchDetails sonuçlarını içeren bir dizi.
-            */
             function geocodeAndDisplayBranchDetails(request, branchMarkers) {
                 geocoder = new google.maps.Geocoder();
                 geocoder.geocode(request)
@@ -949,7 +652,6 @@ Google.MapObject = (function () {
                         var appointmentThead = '';
                         var appointmentRow = '';
 
-                        // Şubenin randevuları için tablo satırları oluşturur
                         branchMarkers.appointment.forEach(element => {
                             appointmentRow += '<tr>' +
                                 '<td>' + element.number + '</td>' +
@@ -963,7 +665,6 @@ Google.MapObject = (function () {
                                 '</tr>';
                         });
 
-                        // Randevu tablosu başlığını oluşturur
                         appointmentThead = '<thead>' +
                             '<tr>' +
                             '<th class="col-md-4">Appointment Number</th>' +
@@ -972,13 +673,11 @@ Google.MapObject = (function () {
                             '</tr>' +
                             '</thead>';
 
-                        // Randevu tablosu gövdesini oluşturur
                         appointmentTbody = '<tbody>' + appointmentRow + '</tbody>';
                         $(".appointmentstablerow").empty();
                         $(".appointmentstablerow").append(appointmentThead);
                         $(".appointmentstablerow").append(appointmentTbody);
 
-                        // Şube bilgilerini ve randevuları gösteren HTML içeriğini oluşturur
                         var html = '<div class="container-fluid p-2" style="max-width: 100%; background-color: rgba(255, 255, 255, 0.85); border-radius: 8px;">' +
                             '<div class="d-flex justify-content-center mb-2">' +
                             '<button type="button" onclick="Google.MapObject.ClosebranchDetailsDiv(this)" class="btn btn-secondary" style="width:35px; height:28px; padding: 0;">' +
@@ -987,7 +686,6 @@ Google.MapObject = (function () {
                             '</svg>' +
                             '</button>' +
                             '</div>' +
-                            // Firma bilgileri
                             '<div class="card col-12 mx-1 mb-2" style="box-shadow: 0 3px 6px rgba(0,0,0,0.1); border-radius: 8px;">' +
                             '<div class="card-body p-3">' +
                             '<h6 class="card-title"><strong>Branch Information</strong></h6>' +
@@ -1002,7 +700,6 @@ Google.MapObject = (function () {
                             '</div>' +
                             '</div>' +
 
-                            // Butonlar
                             '<div class="card col-12 mx-1 mb-2" style="box-shadow: 0 3px 6px rgba(0,0,0,0.1); border-radius: 8px;">' +
                             '<div class="card-body p-2 d-flex flex-column justify-content-around">' +
                             '<div class="mb-2"><input type="button" id="btnBranchInfo" class="btn btn-primary w-100 btn-sm" data-id="' + branchMarkers.id + '" onClick="Google.MapObject.branchInfo(this)" value="Info"></div>' +
@@ -1015,37 +712,23 @@ Google.MapObject = (function () {
 
                         branchDetailsContentElement.innerHTML = html;
 
-                        // Eğer randevu varsa randevu detay butonunu göster, yoksa gizle
                         if (branchMarkers.appointment.length != 0)
                             document.getElementById("btnAppointmentDetails").style.display = 'block';
                         else
                             document.getElementById("btnAppointmentDetails").style.display = 'none';
-                        return results; // geocodeAndDisplayBranchDetails sonuçlarını döndür
+                        return results; 
                     })
                     .catch((e) => {
-                        alert("geocodeAndDisplayBranchDetails was not successful for the following reason: " + e); // geocodeAndDisplayBranchDetails başarısız olursa hata mesajı göster
+                        alert("geocodeAndDisplayBranchDetails was not successful for the following reason: " + e); 
                     });
             }
 
-            /**
-            * Tüm şube işaretleyicilerini (branchMarkers) belirli bir harita nesnesine (`map`) atar.
-            * 
-            * @param {object} map - Harita nesnesi.
-            */
             function assignMapToBranchMarkers(map) {
                 for (var i = 0; i < branchMarkers.length; i++) {
                     branchMarkers[i].setMap(map);
                 }
             }
 
-            /**
-            * Şehir filtrelerine göre ilçe verilerini (filteredCounties) ayarlar ve select2 bileşenine yükler.
-            * 
-            * 1. Şehir filtrelerine göre ilgili ilçeleri `filteredCounties` listesine ekler.
-            * 2. `js-filter-multiple-county` select elementini temizler ve yeni ilçe verilerini ekler.
-            * 
-            * @param {Array} filteredCities - Şehir filtresi olarak kullanılan şehir listesi.
-            */
             function setCountyDataByCityFilter(filteredCities) {
                 filteredCounties = [];
                 filteredCities.forEach(cf => {
@@ -1063,51 +746,42 @@ Google.MapObject = (function () {
                 });
             }
 
-            // Select2 bileşenini şubeler için yapılandırır
             $('#js-filter-multiple-branch').select2({
                 placeholder: "Select a branch",
                 allowClear: true,
                 data: branchList
             });
 
-            // Select2 bileşenini şehirler için yapılandırır
             $('#js-filter-multiple-city').select2({
                 placeholder: "Select a city",
                 allowClear: true,
                 data: cityList
             });
 
-            // Select2 bileşenini ilçeler için yapılandırır
             $('#js-filter-multiple-county').select2({
                 placeholder: "Select a county",
             });
 
-            // Select2 bileşenini kullanıcılar için yapılandırır
             $('#js-filter-multiple-user').select2({
                 placeholder: "Select a user",
                 allowClear: true,
                 data: userList
             });
 
-            // Select2 bileşenini randevu durumu için yapılandırır
             $('#js-filter-single-appointment').select2({
                 placeholder: "Select a appointment status",
                 allowClear: true
             });
 
-            // Şube filtresi değiştiğinde tetiklenen event handler
             $("#js-filter-multiple-branch").on("select2:select select2:unselect", function (e) {
-                // Seçilen şubeleri `filteredBranches` listesine al
                 IsSelectedItemsBranches = $('#js-filter-multiple-branch').select2('data');
 
-                // Haritadaki eski elemanları temizle
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                removeCityCircles(cityCircles); // Şehir dairelerini kaldır
-                removeCountyCircles(countyCircles); // İlçe dairelerini kaldır
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                removeCityCircles(cityCircles); 
+                removeCountyCircles(countyCircles); 
+                clearBranchMarkers(); 
 
-                // Filtrelenmiş şubeleri haritaya ekle
                 if (IsSelectedItemsBranches.length > 0) {
                     // Diğer filtreleri devre dışı bırak
                     $("#js-filter-multiple-city").prop("disabled", true).val(null).trigger("change");
@@ -1115,84 +789,76 @@ Google.MapObject = (function () {
                     $("#js-filter-multiple-user").prop("disabled", true).val(null).trigger("change");
                     $("#js-filter-single-appointment").prop("disabled", true).val(null).trigger("change");
 
-                    generateBranchMarkers(); // Yeni markerları oluştur
+                    generateBranchMarkers(); 
                 } else {
-                    // Eğer şube seçimi yoksa, diğer filtreleri yeniden etkinleştir
                     $("#js-filter-multiple-city").prop("disabled", false);
                     $("#js-filter-multiple-county").prop("disabled", false);
                     $("#js-filter-multiple-user").prop("disabled", false);
                     $("#js-filter-single-appointment").prop("disabled", false);
-                    // Eğer şube seçimi yoksa, haritayı başlangıç duruma döndür
-                    createCityCircles(cityList); // Tüm şehir dairelerini oluştur
-                    createCountyCircles(countyList); // Tüm ilçe dairelerini oluştur
+                    createCityCircles(cityList); 
+                    createCountyCircles(countyList); 
                 }
 
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                map.setZoom(map.getZoom()); 
             });
 
 
-            // Şehir filtresi değiştiğinde tetiklenen event handler
             $("#js-filter-multiple-city").on("select2:select select2:unselect", function (e) {
-                filteredCities = $('#js-filter-multiple-city').select2('data'); // Seçilen şehirleri filtreye al
-                setCountyDataByCityFilter(filteredCities); // İlçeleri şehir filtresine göre güncelle
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                filteredCities = $('#js-filter-multiple-city').select2('data'); 
+                setCountyDataByCityFilter(filteredCities); 
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
             });
 
-            // İlçe filtresi değiştiğinde tetiklenen event handler
             $("#js-filter-multiple-county").on("select2:select select2:unselect", function (e) {
-                filteredCounties = $('#js-filter-multiple-county').select2('data'); // Seçilen ilçeleri filtreye al
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                filteredCounties = $('#js-filter-multiple-county').select2('data'); 
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
             });
 
-            // Kullanıcı filtresi değiştiğinde tetiklenen event handler
             $("#js-filter-multiple-user").on("select2:select select2:unselect", function (e) {
-                filteredUsers = $('#js-filter-multiple-user').select2('data'); // Seçilen kullanıcıları filtreye al
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                filteredUsers = $('#js-filter-multiple-user').select2('data'); 
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
             });
 
-            // Randevu durumu filtresi değiştiğinde tetiklenen event handler
             $("#js-filter-single-appointment").on("select2:select ", function (e) {
                 var data = e.params.data;
-                appointmentStatusInput = data.id; // Seçilen randevu durumunu al
+                appointmentStatusInput = data.id; 
                 if (appointmentStatus.allvisit == appointmentStatusInput) {
-                    // Eğer tüm ziyaretler seçildiyse, tarih aralığı seçimini devre dışı bırak
                     $(".dtappointment").attr("disabled", 'disabled');
                     startDate = new Date('1980-01-01T00:00:00.000Z');
                     endDate = new Date();
                     $('#dtappointmentstart').val(null);
                     $('#dtappointmentend').val(null);
                 } else {
-                    $(".dtappointment").removeAttr('disabled'); // Tarih aralığı seçimini etkinleştir
+                    $(".dtappointment").removeAttr('disabled'); 
                 }
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
                 return;
             });
 
-            // Tarih aralığı değiştiğinde tetiklenen event handler (tarih aralığının doğruluğunu kontrol eder)
             $('.dtappointment').on("change", function (e) {
                 startDate = new Date($('#dtappointmentstart').val());
                 endDate = new Date($('#dtappointmentend').val());
@@ -1209,56 +875,47 @@ Google.MapObject = (function () {
                 return;
             });
 
-            // Başlangıç tarihi değiştiğinde tetiklenen event handler
             $('#dtappointmentstart').on("change", function (e) {
-                filterAllBranches(); // Şubeleri kullanıcı ve şehir bazında filtrele
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                filterAllBranches(); 
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
                 return;
             });
 
-            // Bitiş tarihi değiştiğinde tetiklenen event handler
             $('#dtappointmentend').on("change", function (e) {
-                filterAllBranches(); // Şubeleri kullanıcı ve şehir bazında filtrele
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                filterAllBranches(); 
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
                 return;
             });
 
-            // Renk ayarı ekleme için event handler
             $(document).on('click', '#addColorSetting', function () {
                 const newIndex = $('#colorSettingsContainer').children().length;
                 $('#colorSettingsContainer').append(GMaps.createColorSettingElement({ min: 0, maks: 0, colorcode: '#000000' }, newIndex));
             });
 
-            // Renk ayarı silme için event handler
             $(document).on('click', '.remove-color-setting', function () {
                 $(this).closest('.color-setting-item').remove();
             });
 
-            // Ayarları kaydetme işlemi için event handler
             $(document).on('click', '#saveSettings', function () {
-                //şehir ve ilçe radius boyutunu ayarla
                 googleSettings[0].cityradiussize = $('#cityRadiusSizeNumber').val();
                 googleSettings[0].countyradiussize = $('#countyRadiusSizeNumber').val();
 
-                // Default Circle Color Code'u güncelle
                 googleSettings[0].defaultcirclecolorcode = $('#defaultcirclecolorcode').val();
 
-                // Marker Icon Code'u güncelle
                 googleSettings[0].markericoncode = $('#markerIconSelect').val();
 
-                // Color Settings'i güncelle
                 googleSettings[0].colorsettings = [];
                 $('#colorSettingsContainer .color-setting-item').each(function () {
                     const min = $(this).find('.min-input').val();
@@ -1267,17 +924,15 @@ Google.MapObject = (function () {
                     googleSettings[0].colorsettings.push({ min, maks, colorcode });
                 });
 
-                // Modal'ı kapat
                 $('#GoogleSettingsModal').modal('hide');
 
-                // Haritayı güncelleme işlemi değişikliklerin geçerli olması için
-                removeCityInfoWindows(); // Şehir bilgi pencerelerini kaldır
-                removeCountyInfoWindows(); // İlçe bilgi pencerelerini kaldır
-                createCityCircles(cityList); // Şehir dairelerini oluştur
-                createCountyCircles(countyList); // İlçe dairelerini oluştur
-                clearBranchMarkers(); // Şube işaretleyicilerini kaldır
-                hideBranchDetailsPanel(); // Yanıt div'ini gizle
-                map.setZoom(map.getZoom()); // Harita zoom seviyesini güncelle
+                removeCityInfoWindows(); 
+                removeCountyInfoWindows(); 
+                createCityCircles(cityList); 
+                createCountyCircles(countyList); 
+                clearBranchMarkers(); 
+                hideBranchDetailsPanel(); 
+                map.setZoom(map.getZoom()); 
             });
         },
         ClosebranchDetailsDiv: function (e) {
@@ -1287,13 +942,11 @@ Google.MapObject = (function () {
             window.open('branchdetail.html?branch_id=' + $(e).data("id"), '_blank');
         },
         openAppointmentPanel: function (e) {
-            // Parametrelerden ID ve adı al
             var branchId = $(e).data("id");
             var branchName = $(e).data("name");
 
-            // ID ve adı paneldeki ilgili alanlara yazdır
-            $('#appointmentId').val(branchId);  // ID'yi input alanına ekle
-            $('#appointmentTitle').val(branchName);  // Adı input alanına ekle
+            $('#appointmentId').val(branchId);  
+            $('#appointmentTitle').val(branchName);  
 
             $('#appointmentPanel').show();
             $('#mainContent').addClass('openPanel');
@@ -1303,14 +956,11 @@ Google.MapObject = (function () {
             $('#mainContent').removeClass('openPanel');
         },
         saveAppointment: function (e) {
-            // Burada randevu kaydetme işlemleri yapılır
             alert('Appointment saved successfully!');
-            this.closeAppointmentPanel(); // İşlem sonrası paneli kapat
+            this.closeAppointmentPanel(); 
         },
         DetailAppointment: function (e) {
-            // Tıklanan butondan ID'yi alıyoruz
             var appointmentId = $(e).data("id");
-            // Kullanıcıyı appointment.html sayfasına yönlendiriyoruz, ID'yi query string olarak ekliyoruz
             window.open('appointment.html?id=' + appointmentId, '_blank');
         },
         CreateRoute: function (e) {
@@ -1327,13 +977,10 @@ Google.MapObject = (function () {
             }
         },
         GoogleSettingsRedirect: function () {
-            // Modal açılmadan önce mevcut googleSettings verilerini modal'a yükle
             $('#defaultcirclecolorcode').val(googleSettings[0].defaultcirclecolorcode);
 
-            // Marker ikon seçeneklerini doldur
             const markerIconSelect = $('#markerIconSelect');
             markerIconSelect.empty();
-            // Örnek olarak 1, 2, 3 değerleri kullanılıyor; senin marker ikonlarına göre düzenleyebilirsin
             for (let i = 1; i <= 5; i++) {
                 markerIconSelect.append($('<option>', {
                     value: i,
@@ -1342,14 +989,12 @@ Google.MapObject = (function () {
             }
             markerIconSelect.val(googleSettings[0].markericoncode);
 
-            // Color Settings kısmını doldur
             const colorSettingsContainer = $('#colorSettingsContainer');
             colorSettingsContainer.empty();
             googleSettings[0].colorsettings.forEach((setting, index) => {
                 colorSettingsContainer.append(this.createColorSettingElement(setting, index));
             });
 
-            // Modal'ı aç
             $('#GoogleSettingsModal').modal('show');
         },
         createColorSettingElement: function (setting, index) {

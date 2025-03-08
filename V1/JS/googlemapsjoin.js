@@ -3536,20 +3536,15 @@ const markerIcon = {
     6: 'https://img.icons8.com/nolan/50/marker.png'
 };
 
-// Şubelerde kullanılan şehir ve ilçeleri belirleyelim
 var validCities = cities.filter(city => branches.some(branch => branch.city_id === city.id));
 var validCounties = counties.filter(county => branches.some(branch => branch.county_id === county.id));
 
-// Geçerli kullanıcılar, şubeler ve randevuları filtreleyelim
 var validUsers = users.filter(user => branches.some(branch => branch.user_id === user.id));
 var validBranches = branches.filter(branch => validUsers.some(user => user.id === branch.user_id));
 var validAppointments = appointments.filter(appointment => validBranches.some(branch => branch.id === appointment.branch_id));
 
-// Haritanın ve diğer verilerin yüklenmesi için asenkron fonksiyon
 function initMap() {
-    // Harita yüklendikten sonra, gerekli verilerle birlikte initMap'i çağırılır
     if (typeof google !== 'undefined') {
-        //Google.MapLoader.initMap(39.9334, 32.8597); // Türkiye'nin koordinatları
         Google.MapObject.initMap(validUsers, validCities, validCounties, validBranches, validAppointments, settingsGoogle, systemuserSettings, markerIcon);
     } else {
         console.error("Google Maps API yüklenemedi.");
